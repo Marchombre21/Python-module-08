@@ -11,36 +11,50 @@
 # ****************************************************************************#
 
 import importlib as imp
-
-try:
-    pd = imp.import_module("pandas")
-except ImportError:
-    print("\nYou don't have download pandas library. To download all requested"
-          " dependancies type the command (make it in a virtual environment):")
-    print("python3 -m pip install -r requirements.txt")
-try:
-    plt = imp.import_module("matplotlib.pyplot")
-except ImportError as e:
-    print(e)
-    print("\nYou don't have download matplotlib library. To download all"
-          " requested dependancies type the command (make it in a virtual"
-          " environment): ")
-    print("python3 -m pip install -r requirements.txt")
-try:
-    np = imp.import_module("numpy")
-except ImportError:
-    print("\nYou don't have download numpy library. To download all requested"
-          " dependancies type the command (make it in a virtual environment):")
-    print("python3 -m pip install -r requirements.txt")
+import importlib.metadata
 
 
-def run_analysis():
+def import_function() -> list:
+    libraries: str = ["pandas", "matplotlib.pyplot", "numpy"]
+    purposes: dict = {"pandas": "Data manipulation ready",
+                      "matplotlib.pyplot": "Visualization ready",
+                      "numpy": "Generation data ready"}
+    modules: list = []
+    for library in libraries:
+        try:
+            modules.append(imp.import_module(library))
+            lib: str = library.split(".")[0]
+            version: str = importlib.metadata.version(lib)
+            print(f"[OK] {library} ({version}) - {purposes.get(library)}")
+        except ImportError:
+            print(f"\nYou don't have download {library} library. To download"
+                  " all requested dependencies via pip type the command (make"
+                  " it in a virtual environment):")
+            print("python3 -m pip install -r requirements.txt")
+            print("If you prefer doing that via poetry you have to install it"
+                  " with:")
+            print("python3 -m pip install pipx\npython3 -m pipx ensurepath")
+            print("It will install pipx which is necessary for poetry"
+                  " installation")
+            print("Then you can type 'pipx install poetry'. After that all"
+                  " you have to do is:")
+            print("poetry install --no-root (install all dependencies)")
+            print("poetry run python3 loading.py")
+            raise ImportError("Missing at least one dependency")
+    return modules
+
+
+def main():
     try:
+        print("\nLOADING STATUS: Loading programs...")
+        print("\nChecking dependencies:")
+        pd, plt, np = import_function()
         raw_data = np.random.randn(100, 2)
         df = pd.DataFrame(raw_data, columns=['Stabilité du Code',
                                              'Flux de Données'])
         df['Moyenne Lissée'] =\
             df['Stabilité du Code'].rolling(window=10).mean()
+        print("\nAnalyzing Matrix data...")
         print(f"Analyse de {len(df)} points de données effectuée.")
         plt.figure(figsize=(10, 6))
         plt.plot(df['Stabilité du Code'], label='Signal Brut', alpha=0.3)
@@ -50,10 +64,11 @@ def run_analysis():
         plt.ylabel("Amplitude")
         plt.legend()
         plt.savefig('matrix_analysis.png')
-        print("Graphique sauvegardé sous : matrix_analysis.png")
+        print("\nAnalysis complete")
+        print("Results saved to: matrix_analysis.png")
     except Exception as e:
         print(e)
 
 
 if __name__ == "__main__":
-    run_analysis()
+    main()
