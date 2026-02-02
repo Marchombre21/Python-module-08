@@ -20,8 +20,7 @@ except ImportError:
     print("python3 -m pip install -r requirements.txt")
 try:
     plt = imp.import_module("matplotlib.pyplot")
-except ImportError as e:
-    print(e)
+except ImportError:
     print("\nYou don't have download matplotlib library. To download all"
           " requested dependancies type the command (make it in a virtual"
           " environment): ")
