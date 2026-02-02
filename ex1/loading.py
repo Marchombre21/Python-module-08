@@ -10,12 +10,19 @@
 #                                                                             #
 # ****************************************************************************#
 
+import sys
 import importlib as imp
 import importlib.metadata
 
 
 def import_function() -> list:
-    libraries: str = ["pandas", "matplotlib.pyplot", "numpy"]
+    """It imports all modules in list, check their version and raise an error
+    if needed.
+
+    Returns:
+        list: A list containing all module objects.
+    """
+    libraries: list[str] = ["pandas", "matplotlib.pyplot", "numpy"]
     purposes: dict = {"pandas": "Data manipulation ready",
                       "matplotlib.pyplot": "Visualization ready",
                       "numpy": "Generation data ready"}
@@ -27,27 +34,31 @@ def import_function() -> list:
             version: str = importlib.metadata.version(lib)
             print(f"[OK] {library} ({version}) - {purposes.get(library)}")
         except ImportError:
-            print(f"\nYou don't have download {library} library. To download"
-                  " all requested dependencies via pip type the command (make"
-                  " it in a virtual environment):")
+            print(f"\nThe {library} library is not installed.\nTo download"
+                  " all requested dependencies via pip, type the command (run"
+                  " this within a virtual environment):")
             print("python3 -m pip install -r requirements.txt")
-            print("If you prefer doing that via poetry you have to install it"
-                  " with:")
+            print("\nIf you prefer doing that via poetry you have to install"
+                  " it with:")
             print("python3 -m pip install pipx\npython3 -m pipx ensurepath")
-            print("It will install pipx which is necessary for poetry"
+            print("This installs pipx, which is required to install poetry"
                   " installation")
-            print("Then you can type 'pipx install poetry'. After that all"
+            print("\nThen you can type 'pipx install poetry'. After that all"
                   " you have to do is:")
             print("poetry install --no-root (install all dependencies)")
             print("poetry run python3 loading.py")
-            raise ImportError("Missing at least one dependency")
+            sys.exit(1)
     return modules
 
 
 def main():
+    """Extract the imports, use numpy to generate data, use pandas to format
+    data and finally use matplotlip (and its submodule pyplot) to visualize
+    and save the plot.
+    """
+    print("\nLOADING STATUS: Loading programs...")
+    print("\nChecking dependencies:")
     try:
-        print("\nLOADING STATUS: Loading programs...")
-        print("\nChecking dependencies:")
         pd, plt, np = import_function()
         raw_data = np.random.randn(100, 2)
         df = pd.DataFrame(raw_data, columns=['Stabilité du Code',
